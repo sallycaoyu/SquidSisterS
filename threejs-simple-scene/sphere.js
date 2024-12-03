@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { DragControls } from 'three/examples/jsm/controls/DragControls.js';
 
 // create a scene of 10 spheres w random size and color and location
 
@@ -16,14 +17,21 @@ document.body.appendChild( renderer.domElement );
 
 camera.position.z = 100;
 
+// // add cube ex.
+// const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+// const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+// const cube = new THREE.Mesh( geometry, material );
+// scene.add( cube );
+
+// put lights and balls into scene to render
 function init() {
     scene.add( new THREE.AmbientLight( 0x0f0f0f ) );
     var light = new THREE.SpotLight( 0xffffff, 1.5 );
 	light.position.set( 0, 500, 2000 );
     scene.add(light);
 
-	const geometry = new THREE.SphereGeometry( 10, 10, 10 );
-
+    // add 10 balls of same size, but random color and location to scene
+	const geometry = new THREE.SphereGeometry( 10, 10, 10 ); // move into loop later for random size as well
     for (var i = 0; i < 10; i++) {
         const material = new THREE.MeshBasicMaterial( { color: Math.random() * 0xffffff } );
 		const sphere = new THREE.Mesh( geometry, material );
@@ -35,16 +43,27 @@ function init() {
 		sphere.castShadow = true;
 		sphere.receiveShadow = true;
 
-		scene.add( sphere );
-
-		objects.push( sphere );
+		scene.add( sphere ); // add to scene to render
+		objects.push( sphere ); // store for drag n drop
 	}
-}
 
-// const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-// const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-// const cube = new THREE.Mesh( geometry, material );
-// scene.add( cube );
+    // add drag controls for all balls
+    const controls = new DragControls( objects, camera, renderer.domElement );
+    // controls.deactivate(); // turn off drag
+
+    // add event listerners for hovering over, expanding the object user is about to interact with
+    controls.addEventListener( 'hoveron', function(event){
+        console.log(event.object);
+        event.object.scale.x *= 1.2; // expand it
+        event.object.scale.y *= 1.2;
+        event.object.scale.z *= 1.2;
+    } );
+    controls.addEventListener( 'hoveroff', function(event){
+        event.object.scale.x /= 1.2; // expand it
+        event.object.scale.y /= 1.2;
+        event.object.scale.z /= 1.2;
+    } );
+}
 
 init(); // call to create all spheres
 
