@@ -1,4 +1,5 @@
 // 3js tutorial: https://threejs.org/docs/#manual/en/introduction/Creating-a-scene 
+// a rotating cube
 import * as THREE from 'three';
 
 // create scene
