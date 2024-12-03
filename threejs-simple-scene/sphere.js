@@ -31,6 +31,7 @@ function init() {
     scene.add(light);
 
     // add 10 balls of same size, but random color and location to scene
+    // randomness reference: https://github.com/learnthreejs/three-js-boilerplate/blob/example-dragcontrols-finish/public/examples/draggable-objects-dragcontrols/scripts.js 
 	const geometry = new THREE.SphereGeometry( 10, 10, 10 ); // move into loop later for random size as well
     for (var i = 0; i < 10; i++) {
         const material = new THREE.MeshBasicMaterial( { color: Math.random() * 0xffffff } );
@@ -58,11 +59,14 @@ function init() {
         event.object.scale.y *= 1.2;
         event.object.scale.z *= 1.2;
     } );
-    controls.addEventListener( 'hoveroff', function(event){
+    // return object to normal once drag is done 
+    controls.addEventListener( 'dragend', function(event){
         event.object.scale.x /= 1.2; // expand it
         event.object.scale.y /= 1.2;
         event.object.scale.z /= 1.2;
     } );
+    // by this design, balls will expand when only hover and no drag, and shrink when only click on it\
+    // later can change bouncy characteristics w difference sizes
 }
 
 init(); // call to create all spheres
