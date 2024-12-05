@@ -7,6 +7,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color( 0xf0f0f0 ); // set to a light grey, later change w enviornment 
 
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 10000 ); // 10000 ?
+scene.add(camera);
 
 const objects = []; // to keep track of drag and drop
 var startColor; 
