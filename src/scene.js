@@ -7,9 +7,9 @@ export class Scene {
         const scene = new THREE.Scene();
         const canvas = document.querySelector("#canvas");
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(50, 100, 50);
-        camera.lookAt(0, 200, 0);
-        const controls = new OrbitControls(camera, canvas);
+        camera.position.set(50, 100, 200);
+        camera.lookAt(0, 100, 0);
+        const cameraControl = new OrbitControls(camera, canvas); // enable spin view w mouse
 
         // Renderer setup
         const renderer = new THREE.WebGLRenderer({canvas});
@@ -21,6 +21,6 @@ export class Scene {
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
-        return { scene, camera, renderer };
+        return { scene, camera, renderer, cameraControl };
     }
 }

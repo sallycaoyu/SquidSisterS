@@ -4,7 +4,7 @@ import { DirectionalLight, SpotLight } from './light.js';
 import { DragControls } from 'three/examples/jsm/controls/DragControls';
 
 console.log('Initializing scene...');
-const { scene, camera, renderer } = new Scene();
+const { scene, camera, renderer, cameraControl } = new Scene();
 const ground = new Ground(scene);
 const directionalLight = new DirectionalLight(scene);
 const spotLight = new SpotLight(scene);
@@ -12,17 +12,62 @@ const spotLight = new SpotLight(scene);
 // create balls
 console.log('Creating balls...');
 const ballList = [];
+const ballDragList = [];
 for (let i = 0; i < 10; i++) {
     const ballname = `ball-${i}`;
     const ballObject = new Ball(scene, ballname);
     const ball = scene.getObjectByName(ballname);
     if (ball) {
         ballList.push(ballObject);
+        ballDragList.push(ballObject.ball); 
         console.log(`Created ball: ${ballname}`);
     } else {
         console.error(`Failed to create ball: ${ballname}`);
     }
 }
+
+// add drag drop control to all balls
+// const controls = new DragControls( ballList, camera, renderer.domElement );
+// // controls.deactivate(); // turn off drag
+
+// // add event listerners for hovering over, expanding the object user is about to interact with
+// controls.addEventListener( 'hoveron', function(event){
+//     console.log(event.object);
+//     event.object.scale.x *= 1.2; // expand it
+//     event.object.scale.y *= 1.2;
+//     event.object.scale.z *= 1.2;
+// } );
+// // return object to normal once drag is done 
+// controls.addEventListener( 'dragend', function(event){
+//     event.object.scale.x /= 1.2; // expand it
+//     event.object.scale.y /= 1.2;
+//     event.object.scale.z /= 1.2;
+// } );
+// // by this design, balls will expand when only hover and no drag, and shrink when only click on it\
+// // later can change bouncy characteristics w difference sizes
+
+// deactivate orbit control version
+// camera.controls.deactivate();
+const dragControls = new DragControls(ballDragList, camera, renderer.domElement);
+
+// Disable OrbitControls while dragging
+dragControls.addEventListener( 'hoveron', function(event) {
+    event.object.scale.x *= 1.2; // expand it
+    event.object.scale.y *= 1.2;
+    event.object.scale.z *= 1.2;
+    cameraControl.enabled = false; // Disable OrbitControls
+});
+
+dragControls.addEventListener( 'hoveroff', function(event) {
+    cameraControl.enabled = true; // Disable OrbitControls
+});
+
+dragControls.addEventListener( 'dragend', function(event){
+    event.object.scale.x /= 1.2; // return the size
+    event.object.scale.y /= 1.2;
+    event.object.scale.z /= 1.2;
+    cameraControl.enabled = true; // Re-enable OrbitControls
+});
 
 // Animation loop
 console.log('Starting animation loop...');
