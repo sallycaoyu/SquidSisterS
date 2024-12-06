@@ -111,7 +111,7 @@ export class Ground {
 
         // ground from three.js example
         const groundGeometry = new THREE.PlaneGeometry( 500, 500, 10, 10 );
-        const groundMaterial = new THREE.MeshBasicMaterial( { color: 0xFFC0CB } );
+        const groundMaterial = new THREE.MeshBasicMaterial( { color: 0xDDDDDD } );
         const ground = new THREE.Mesh( groundGeometry, groundMaterial );
         ground.rotation.x = Math.PI * - 0.5;
         ground.position.set(0, -10, 0);
