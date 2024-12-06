@@ -17,11 +17,11 @@ const ballList = [];
 const ballDragList = [];
 for (let i = 0; i < 10; i++) {
     const ballname = `ball-${i}`;
-    const ballObject = new Ball(scene, ballname);
+    const ballObject = new Ball(scene, ballname, ballDragList);
     const ball = scene.getObjectByName(ballname);
     if (ball) {
         ballList.push(ballObject);
-        ballDragList.push(ballObject.body); 
+        //ballDragList.push(ballObject.body); 
         console.log(`Created ball: ${ballname}`);
     } else {
         console.error(`Failed to create ball: ${ballname}`);
@@ -32,9 +32,9 @@ const dragControls = new DragControls(ballDragList, camera, renderer.domElement)
 
 // Disable OrbitControls while dragging
 dragControls.addEventListener( 'hoveron', function(event) {
-    event.object.scale.x *= 1.2; // expand it
-    event.object.scale.y *= 1.2;
-    event.object.scale.z *= 1.2;
+    // event.object.scale.x *= 1.2; // expand it
+    // event.object.scale.y *= 1.2;
+    // event.object.scale.z *= 1.2;
     cameraControl.enabled = false; // Disable OrbitControls
 });
 
@@ -43,9 +43,9 @@ dragControls.addEventListener( 'hoveroff', function(event) {
 });
 
 dragControls.addEventListener( 'dragend', function(event){
-    event.object.scale.x /= 1.2; // return the size
-    event.object.scale.y /= 1.2;
-    event.object.scale.z /= 1.2;
+    // event.object.scale.x /= 1.2; // return the size
+    // event.object.scale.y /= 1.2;
+    // event.object.scale.z /= 1.2;
     cameraControl.enabled = true; // Re-enable OrbitControls
 });
 

@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 
 export class Physics {
-    handleCollisions(animals) {
-        for (let i = 0; i < animals.length; i++) {
-            for (let j = i + 1; j < animals.length; j++) {
-                const a1 = animals[i];
-                const a2 = animals[j];
+    handleCollisions(balls) {
+        for (let i = 0; i < balls.length; i++) {
+            for (let j = i + 1; j < balls.length; j++) {
+                const a1 = balls[i];
+                const a2 = balls[j];
                 
                 const diff = new THREE.Vector3().subVectors(a2.body.position, a1.body.position);
                 const dist = diff.length();
@@ -15,7 +15,7 @@ export class Physics {
                     // Normalize the difference vector
                     const normal = diff.normalize();
                     
-                    // Move animals apart
+                    // Move balls apart
                     const overlap = minDist - dist;
                     const totalMass = a1.mass + a2.mass;
                     const moveRatio1 = a2.mass / totalMass;
