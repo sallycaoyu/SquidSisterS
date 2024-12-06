@@ -6,11 +6,11 @@ export class Ball {
         this.timeStep = 0.25;
         this.gravity = 9.8;
         this.restitution = 0.9;
-        this.floorY = -5;
-        
+        this.floorY = -2;
+        this.radius = 5;
         this.velocity = 0;
 
-        const geometry = new THREE.SphereGeometry(5, 32, 32);
+        const geometry = new THREE.SphereGeometry(this.radius, 32, 32);
         const material = new THREE.MeshStandardMaterial({
             color: Math.random() * 0xffffff,
             roughness: 0.2, // Slight roughness for better light interaction
@@ -46,13 +46,14 @@ export class Ball {
         scene.add(this.ball);
     }
 
+
     move() {
         this.velocity -= this.gravity * this.timeStep;
         let yPosition = this.ball.position.y;
         yPosition += this.velocity * this.timeStep;
         
-        if (yPosition < this.floorY) {
-            yPosition = this.floorY;
+        if (yPosition - this.radius < this.floorY) {
+            yPosition = this.floorY + this.radius;
             this.velocity = -this.velocity * this.restitution;
             
             // if (Math.abs(this.velocity) < 0.1) {

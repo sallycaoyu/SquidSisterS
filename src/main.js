@@ -54,6 +54,9 @@ const dragControls = new DragControls(ballDragList, camera, renderer.domElement)
 dragControls.addEventListener( 'hoveron', function(event) {
     event.object.scale.x *= 1.2; // expand it
     event.object.scale.y *= 1.2;
+    // if (event.object.position.y - (event.object.scale.y / 2) < ground.position.y) {
+    //     event.object.position.y = ground.position.y + (event.object.scale.y / 2);
+    // }
     event.object.scale.z *= 1.2;
     cameraControl.enabled = false; // Disable OrbitControls
 });
@@ -65,6 +68,9 @@ dragControls.addEventListener( 'hoveroff', function(event) {
 dragControls.addEventListener( 'dragend', function(event){
     event.object.scale.x /= 1.2; // return the size
     event.object.scale.y /= 1.2;
+    // if (event.object.position.y - (event.object.scale.y / 2) < ground.position.y) {
+    //     event.object.position.y = ground.position.y + (event.object.scale.y / 2);
+    // }
     event.object.scale.z /= 1.2;
     cameraControl.enabled = true; // Re-enable OrbitControls
 });
