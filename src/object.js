@@ -1,23 +1,29 @@
 import * as THREE from 'three';
 
 export class Ball {
-    
     constructor(scene, ballname) {
         this.timeStep = 0.25;
         this.gravity = 9.8;
-        this.restitution = 0.9;
-        this.floorY = -5;
-        
-        this.velocity = 0;
+        this.bounciness = 0.8;
+        this.floorY = -10;
+        this.radius = 20;
+        this.maxStretch = 2.0;
+        this.minSquash = 0.5;
+        this.velocity = new THREE.Vector3(
+            (Math.random() - 0.5) * 2,  // Increased initial velocity
+            Math.random() * 5,          // More upward initial velocity
+            (Math.random() - 0.5) * 2
+        );
+        this.mass = this.radius * this.radius * this.radius;  // Mass proportional to volume
 
-        const geometry = new THREE.SphereGeometry(10, 32, 32);
+        const geometry = new THREE.SphereGeometry(this.radius, 32, 32);
         const material = new THREE.MeshStandardMaterial({
             color: Math.random() * 0xffffff,
             roughness: 0.2, // Slight roughness for better light interaction
             metalness: 0.1
         });
-        this.ball = new THREE.Mesh(geometry, material);
-        this.ball.name = ballname;
+        this.body = new THREE.Mesh(geometry, material);
+        this.body.name = ballname;
 
         let position;
         let isPositionValid = false;
@@ -38,36 +44,62 @@ export class Ball {
                 }
             }
         }
-        this.ball.position.copy(position);
+        this.body.position.copy(position);
 
-        this.ball.castShadow = true;
-        this.ball.receiveShadow = true;
+        this.body.castShadow = true;
+        this.body.receiveShadow = true;
 
-        scene.add(this.ball);
+        scene.add(this.body);
     }
 
-    move() {
-        this.velocity -= this.gravity * this.timeStep;
-        let yPosition = this.ball.position.y;
-        yPosition += this.velocity * this.timeStep;
+
+    update() {
+         // Apply gravity
+        this.velocity.y -= this.gravity * this.timeStep;
         
-        if (yPosition < this.floorY) {
-            yPosition = this.floorY;
-            this.velocity = -this.velocity * this.restitution;
+        // Update position
+        this.body.position.x += this.velocity.x * this.timeStep;
+        this.body.position.y += this.velocity.y * this.timeStep;
+        this.body.position.z += this.velocity.z * this.timeStep;
+        
+        // Enhanced floor bounce
+        if (this.body.position.y - this.radius < this.floorY) {
+            this.body.position.y = this.floorY + this.radius;
+            this.velocity.y = -this.velocity.y * this.bounciness;
             
-            // if (Math.abs(this.velocity) < 0.1) {
-            //     this.velocity = 0;
-            //     yPosition = this.floorY;
-            // }
+            // Add random spin on bounce
+            this.body.rotation.x += (Math.random() - 0.5) * 0.2;
+            this.body.rotation.z += (Math.random() - 0.5) * 0.2;
+            
+            // Add random horizontal movement
+            this.velocity.x += (Math.random() - 0.5) * 2;
+            this.velocity.z += (Math.random() - 0.5) * 2;
         }
         
-        this.ball.position.y = yPosition;
+        // Enhanced wall bounds
+        const bounds = 200;
+        if (Math.abs(this.body.position.x) > bounds) {
+            this.velocity.x *= -this.bounciness;
+            this.body.position.x = Math.sign(this.body.position.x) * bounds;
+        }
+        if (Math.abs(this.body.position.z) > bounds) {
+            this.velocity.z *= -this.bounciness;
+            this.body.position.z = Math.sign(this.body.position.z) * bounds;
+        }
+        
+        // Enhanced squash and stretch
+        const verticalStretch = Math.min(this.maxStretch, 1 + this.velocity.y * 0.005);
+        const horizontalSquash = Math.max(this.minSquash, 1 / Math.sqrt(Math.abs(verticalStretch)));
+        this.body.scale.set(horizontalSquash, verticalStretch, horizontalSquash);
     }
 }
 
 export class Ground {
     constructor(scene) {
-        // const geometry = new THREE.BoxGeometry(500, 1, 500);
+        this.width = 500;
+        this.height = 1;
+        this.depth = 500;
+        // const geometry = new THREE.BoxGeometry(this.width, this.height, this.depth);
         // const material = new THREE.MeshStandardMaterial({
         //     color: 0xDDDDDD,
         //     roughness: 0.5, // Added some roughness for more realistic appearance
@@ -78,7 +110,7 @@ export class Ground {
         // scene.add(this.ground);
 
         // ground from three.js example
-        const groundGeometry = new THREE.PlaneGeometry( 250, 250, 10, 10 );
+        const groundGeometry = new THREE.PlaneGeometry( 500, 500, 10, 10 );
         const groundMaterial = new THREE.MeshBasicMaterial( { color: 0xFFC0CB } );
         const ground = new THREE.Mesh( groundGeometry, groundMaterial );
         ground.rotation.x = Math.PI * - 0.5;
