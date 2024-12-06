@@ -10,7 +10,7 @@ export class Ball {
         
         this.velocity = 0;
 
-        const geometry = new THREE.SphereGeometry(5, 32, 32);
+        const geometry = new THREE.SphereGeometry(10, 32, 32);
         const material = new THREE.MeshStandardMaterial({
             color: Math.random() * 0xffffff,
             roughness: 0.2, // Slight roughness for better light interaction
@@ -67,14 +67,35 @@ export class Ball {
 
 export class Ground {
     constructor(scene) {
-        const geometry = new THREE.BoxGeometry(500, 1, 500);
-        const material = new THREE.MeshStandardMaterial({
-            color: 0xDDDDDD,
-            roughness: 0.5, // Added some roughness for more realistic appearance
-        });
-        this.ground = new THREE.Mesh(geometry, material);
-        this.ground.position.set(0, -10, 0);
-        this.ground.name = 'ground';
-        scene.add(this.ground);
+        // const geometry = new THREE.BoxGeometry(500, 1, 500);
+        // const material = new THREE.MeshStandardMaterial({
+        //     color: 0xDDDDDD,
+        //     roughness: 0.5, // Added some roughness for more realistic appearance
+        // });
+        // this.ground = new THREE.Mesh(geometry, material);
+        // this.ground.position.set(0, -10, 0);
+        // this.ground.name = 'ground';
+        // scene.add(this.ground);
+
+        // ground from three.js example
+        const groundGeometry = new THREE.PlaneGeometry( 250, 250, 10, 10 );
+        const groundMaterial = new THREE.MeshBasicMaterial( { color: 0xFFC0CB } );
+        const ground = new THREE.Mesh( groundGeometry, groundMaterial );
+        ground.rotation.x = Math.PI * - 0.5;
+        ground.position.set(0, -10, 0);
+        scene.add( ground );
+
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.load( 'src/textures/beach_1.png', function ( map ) {
+
+            map.wrapS = THREE.RepeatWrapping;
+            map.wrapT = THREE.RepeatWrapping;
+            map.anisotropy = 16;
+            map.repeat.set( 1, 1 );
+            map.colorSpace = THREE.SRGBColorSpace;
+            groundMaterial.map = map;
+            groundMaterial.needsUpdate = true;
+
+        } );
     }
 }
