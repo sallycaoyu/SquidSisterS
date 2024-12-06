@@ -63,3 +63,4 @@ const animate = () => {
 
 animate();
 console.log('Animation loop started.');
+

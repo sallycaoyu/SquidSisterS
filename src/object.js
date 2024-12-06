@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 
 export class Ball {
     constructor(scene, ballname) {
@@ -148,6 +149,130 @@ export class Ground {
             groundMaterial.needsUpdate = true;
 
         } );
+
+
+        const worldWidth = 256, worldDepth = 256;
+
+        const data = this.generateHeight( worldWidth, worldDepth );
+        
+        const geometry = new THREE.PlaneGeometry( 500, 500, worldWidth - 1, worldDepth - 1 );
+        geometry.rotateX( - Math.PI / 2 );
+
+        const vertices = geometry.attributes.position.array;
+
+        for ( let i = 0, j = 0, l = vertices.length; i < l; i ++, j += 3 ) {
+
+            vertices[ j + 1 ] = data[ i ] * 10;
+
+        }
+
+        //
+
+        texture = new THREE.CanvasTexture( this.generateTexture( data, worldWidth, worldDepth ) );
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+        texture.colorSpace = THREE.SRGBColorSpace;
+
+        mesh = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { map: texture } ) );
+        scene.add( mesh );
+
+        const geometryHelper = new THREE.ConeGeometry( 20, 100, 3 );
+        geometryHelper.translate( 0, 50, 0 );
+        geometryHelper.rotateX( Math.PI / 2 );
+        helper = new THREE.Mesh( geometryHelper, new THREE.MeshNormalMaterial() );
+        scene.add( helper );
+    }
+
+    generateHeight( width, height ) {
+
+        const size = width * height, data = new Uint8Array( size ),
+            perlin = new ImprovedNoise(), z = Math.random() * 100;
+
+        let quality = 1;
+
+        for ( let j = 0; j < 4; j ++ ) {
+
+            for ( let i = 0; i < size; i ++ ) {
+
+                const x = i % width, y = ~ ~ ( i / width );
+                data[ i ] += Math.abs( perlin.noise( x / quality, y / quality, z ) * quality * 1.75 );
+
+            }
+
+            quality *= 5;
+
+        }
+
+        return data;
+
+    }
+
+    generateTexture( data, width, height ) {
+
+        // bake lighting into texture
+
+        let context, image, imageData, shade;
+
+        const vector3 = new THREE.Vector3( 0, 0, 0 );
+
+        const sun = new THREE.Vector3( 1, 1, 1 );
+        sun.normalize();
+
+        const canvas = document.createElement( 'canvas' );
+        canvas.width = width;
+        canvas.height = height;
+
+        context = canvas.getContext( '2d' );
+        context.fillStyle = '#000';
+        context.fillRect( 0, 0, width, height );
+
+        image = context.getImageData( 0, 0, canvas.width, canvas.height );
+        imageData = image.data;
+
+        for ( let i = 0, j = 0, l = imageData.length; i < l; i += 4, j ++ ) {
+
+            vector3.x = data[ j - 2 ] - data[ j + 2 ];
+            vector3.y = 2;
+            vector3.z = data[ j - width * 2 ] - data[ j + width * 2 ];
+            vector3.normalize();
+
+            shade = vector3.dot( sun );
+
+            imageData[ i ] = ( 96 + shade * 128 ) * ( 0.5 + data[ j ] * 0.007 );
+            imageData[ i + 1 ] = ( 32 + shade * 96 ) * ( 0.5 + data[ j ] * 0.007 );
+            imageData[ i + 2 ] = ( shade * 96 ) * ( 0.5 + data[ j ] * 0.007 );
+
+        }
+
+        context.putImageData( image, 0, 0 );
+
+        // Scaled 4x
+
+        const canvasScaled = document.createElement( 'canvas' );
+        canvasScaled.width = width * 4;
+        canvasScaled.height = height * 4;
+
+        context = canvasScaled.getContext( '2d' );
+        context.scale( 4, 4 );
+        context.drawImage( canvas, 0, 0 );
+
+        image = context.getImageData( 0, 0, canvasScaled.width, canvasScaled.height );
+        imageData = image.data;
+
+        for ( let i = 0, l = imageData.length; i < l; i += 4 ) {
+
+            const v = ~ ~ ( Math.random() * 5 );
+
+            imageData[ i ] += v;
+            imageData[ i + 1 ] += v;
+            imageData[ i + 2 ] += v;
+
+        }
+
+        context.putImageData( image, 0, 0 );
+
+        return canvasScaled;
+
     }
     
     // Perlin noise implementation
@@ -234,3 +359,161 @@ export class Ground {
         };
     }
 }
+
+
+// export class Beach {
+//     constructor(scene) {
+//         // Create ground geometry with high detail
+//         const width = 500;
+//         const height = 500;
+//         const segments = 150;
+//         const geometry = new THREE.PlaneGeometry(width, height, segments, segments);
+
+//         // Get vertices for noise application
+//         const vertices = geometry.attributes.position.array;
+
+//         // Create sand dunes with Perlin noise
+//         for (let i = 0; i < vertices.length; i += 3) {
+//             const x = vertices[i];
+//             const z = vertices[i + 2];
+
+//             // Layer different frequencies of noise for natural look
+//             let elevation = 
+//                 this.noise(x * 0.002, z * 0.002) * 15 +    // Large dunes
+//                 this.noise(x * 0.01, z * 0.01) * 2 +       // Medium details
+//                 this.noise(x * 0.03, z * 0.03) * 0.5;      // Small ripples
+
+//             // Create a slope towards the water
+//             const distanceFromCenter = Math.sqrt(x * x + z * z);
+//             const beachSlope = Math.max(0, distanceFromCenter * 0.01);
+//             elevation = Math.max(elevation - beachSlope, -2);
+
+//             // Set the vertex height
+//             vertices[i + 1] = elevation;
+//         }
+
+//         // Update normals for correct lighting
+//         geometry.computeVertexNormals();
+
+//         // Create sand material
+//         const sandTexture = this.createSandTexture();
+//         const material = new THREE.MeshPhongMaterial({
+//             map: sandTexture,
+//             color: 0xE6D5AC,       // Sand color
+//             shininess: 0,          // Matt finish
+//             bumpMap: sandTexture,  // Use same texture for bump
+//             bumpScale: 0.2,        // Subtle bumps
+//         });
+
+//         this.mesh = new THREE.Mesh(geometry, material);
+//         this.mesh.rotation.x = -Math.PI / 2;  // Rotate to be horizontal
+//         this.mesh.receiveShadow = true;
+
+//         scene.add(this.mesh);
+
+//         // Add water plane
+//         const waterGeometry = new THREE.PlaneGeometry(width, height);
+//         const waterMaterial = new THREE.MeshPhongMaterial({
+//             color: 0x0077BE,
+//             transparent: true,
+//             opacity: 0.8,
+//             shininess: 100
+//         });
+
+//         this.water = new THREE.Mesh(waterGeometry, waterMaterial);
+//         this.water.rotation.x = -Math.PI / 2;
+//         this.water.position.y = -1;  // Slightly below beach level
+//         scene.add(this.water);
+//     }
+
+//     // Improved Perlin noise function
+//     noise(x, z) {
+//         const X = Math.floor(x) & 255;
+//         const Z = Math.floor(z) & 255;
+//         x -= Math.floor(x);
+//         z -= Math.floor(z);
+
+//         // Fade function for smoother interpolation
+//         const fade = t => t * t * t * (t * (t * 6 - 15) + 10);
+
+//         const u = fade(x);
+//         const v = fade(z);
+
+//         // Get random values from permutation table
+//         const perm = this.buildPermutationTable();
+//         const A = perm[X] + Z;
+//         const B = perm[(X + 1) & 255] + Z;
+
+//         // Interpolate between gradient values
+//         return this.lerp(
+//             v,
+//             this.lerp(
+//                 u,
+//                 this.grad(perm[A], x, z),
+//                 this.grad(perm[B], x - 1, z)
+//             ),
+//             this.lerp(
+//                 u,
+//                 this.grad(perm[A + 1], x, z - 1),
+//                 this.grad(perm[B + 1], x - 1, z - 1)
+//             )
+//         );
+//     }
+
+//     buildPermutationTable() {
+//         const p = new Array(512);
+//         for (let i = 0; i < 256; i++) p[i] = i;
+        
+//         // Shuffle array
+//         for (let i = 255; i > 0; i--) {
+//             const j = Math.floor(Math.random() * (i + 1));
+//             [p[i], p[j]] = [p[j], p[i]];
+//         }
+        
+//         // Duplicate to avoid buffer overflow
+//         for (let i = 0; i < 256; i++) p[256 + i] = p[i];
+        
+//         return p;
+//     }
+
+//     grad(hash, x, z) {
+//         const h = hash & 15;
+//         const grad = 1 + (h & 7);
+//         return ((h & 8) ? -grad : grad) * x + ((h & 4) ? -grad : grad) * z;
+//     }
+
+//     lerp(t, a, b) {
+//         return a + t * (b - a);
+//     }
+
+//     createSandTexture() {
+//         const canvas = document.createElement('canvas');
+//         canvas.width = 512;
+//         canvas.height = 512;
+//         const ctx = canvas.getContext('2d');
+
+//         // Create sand texture with noise
+//         for (let x = 0; x < canvas.width; x++) {
+//             for (let y = 0; y < canvas.height; y++) {
+//                 const value = (this.noise(x * 0.1, y * 0.1) + 1) * 0.5;
+//                 const r = Math.floor(230 + value * 25);
+//                 const g = Math.floor(213 + value * 25);
+//                 const b = Math.floor(172 + value * 25);
+//                 ctx.fillStyle = `rgb(${r},${g},${b})`;
+//                 ctx.fillRect(x, y, 1, 1);
+//             }
+//         }
+
+//         const texture = new THREE.CanvasTexture(canvas);
+//         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+//         texture.repeat.set(4, 4);
+//         return texture;
+//     }
+
+//     update(time) {
+//         // Animate water
+//         if (this.water) {
+//             this.water.position.y = -1 + Math.sin(time * 0.5) * 0.1;
+//         }
+//     }
+// }
