@@ -94,7 +94,26 @@ export class Ball {
     }
 }
 
+// export class Ground {
+//     constructor(scene) {
+//         this.width = 500;
+//         this.height = 1;
+//         this.depth = 500;
+//         const geometry = new THREE.BoxGeometry(this.width, this.height, this.depth);
+//         const material = new THREE.MeshStandardMaterial({
+//             color: 0xDDDDDD,
+//             roughness: 0.5, // Added some roughness for more realistic appearance
+//         });
+//         this.ground = new THREE.Mesh(geometry, material);
+//         this.ground.position.set(0, -10, 0);
+//         this.ground.name = 'ground';
+//         scene.add(this.ground);
+//     }
+// }
+
 export class Ground {
+    p = new Array(512);
+    
     constructor(scene) {
         this.width = 500;
         this.height = 1;
@@ -129,5 +148,89 @@ export class Ground {
             groundMaterial.needsUpdate = true;
 
         } );
+    }
+    
+    // Perlin noise implementation
+    perlinNoise(x, z) {
+        // Simple 2D Perlin noise approximation
+        const X = Math.floor(x) & 255;
+        const Z = Math.floor(z) & 255;
+        x -= Math.floor(x);
+        z -= Math.floor(z);
+        
+        const u = this.fade(x);
+        const v = this.fade(z);
+        
+        const A = this.p[X] + Z;
+        const B = this.p[X + 1] + Z;
+        
+        return this.lerp(v,
+            this.lerp(u, 
+                this.grad(this.p[A], x, z),
+                this.grad(this.p[B], x - 1, z)
+            ),
+            this.lerp(u,
+                this.grad(this.p[A + 1], x, z - 1),
+                this.grad(this.p[B + 1], x - 1, z - 1)
+            )
+        );
+    }
+    
+    fade(t) {
+        return t * t * t * (t * (t * 6 - 15) + 10);
+    }
+    
+    lerp(t, a, b) {
+        return a + t * (b - a);
+    }
+    
+    grad(hash, x, z) {
+        const h = hash & 15;
+        const grad = 1 + (h & 7);
+        return ((h & 8) ? -grad : grad) * x + ((h & 4) ? -grad : grad) * z;
+    }
+    
+    
+    createSandTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const context = canvas.getContext('2d');
+        
+        // Create sand-like texture
+        for (let x = 0; x < canvas.width; x++) {
+            for (let y = 0; y < canvas.height; y++) {
+                const value = (this.perlinNoise(x * 0.05, y * 0.05) + 1) * 0.5;
+                const rgb = this.getSandColor(value);
+                context.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+                context.fillRect(x, y, 1, 1);
+            }
+        }
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(4, 4);
+        return texture;
+    }
+    
+    getSandColor(value) {
+        // Sand color palette
+        const baseColor = {
+            r: 238,
+            g: 214,
+            b: 175
+        };
+        
+        const darkColor = {
+            r: 205,
+            g: 183,
+            b: 158
+        };
+        
+        return {
+            r: Math.floor(this.lerp(value, darkColor.r, baseColor.r)),
+            g: Math.floor(this.lerp(value, darkColor.g, baseColor.g)),
+            b: Math.floor(this.lerp(value, darkColor.b, baseColor.b))
+        };
     }
 }
