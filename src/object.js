@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Water } from 'three/addons/objects/Water2.js';
 
 export class Ball {
     constructor(scene, ballname) {
@@ -112,7 +113,7 @@ export class Ball {
 // }
 
 export class Ground {
-    p = new Array(512);
+    // p = new Array(512);
     
     constructor(scene) {
         this.width = 500;
@@ -128,26 +129,64 @@ export class Ground {
         // this.ground.name = 'ground';
         // scene.add(this.ground);
 
-        // ground from three.js example
+        // ground (three.js example https://github.com/mrdoob/three.js/blob/master/examples/webgl_water.html) 
         const groundGeometry = new THREE.PlaneGeometry( 500, 500, 10, 10 );
-        const groundMaterial = new THREE.MeshBasicMaterial( { color: 0xDDDDDD } );
+        const groundMaterial = new THREE.MeshStandardMaterial( { roughness: 0.8, metalness: 0.4 } );
         const ground = new THREE.Mesh( groundGeometry, groundMaterial );
-        ground.rotation.x = Math.PI * - 0.5;
-        ground.position.set(0, -10, 0);
+        ground.rotation.x = Math.PI * - 0.5; // turn it to horizontal plane
+        ground.position.set(0, -5, 0);
         scene.add( ground );
-
+        // load beach texture onto ground
         const textureLoader = new THREE.TextureLoader();
         textureLoader.load( 'src/textures/beach_1.png', function ( map ) {
-
             map.wrapS = THREE.RepeatWrapping;
             map.wrapT = THREE.RepeatWrapping;
             map.anisotropy = 16;
-            map.repeat.set( 1, 1 );
+            map.repeat.set( 1, 1 ); // one time full image
             map.colorSpace = THREE.SRGBColorSpace;
             groundMaterial.map = map;
             groundMaterial.needsUpdate = true;
-
         } );
+        
+        // add water refraction
+        let water; 
+        const waterGeometry = new THREE.PlaneGeometry( 300, 500 );
+        const watertextureLoader = new THREE.TextureLoader();
+        const waterNormalMap = watertextureLoader.load('src/textures/Water_2_M_Normal.jpg', function (texture) {
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+        });
+        water = new Water( waterGeometry, {
+            color: '#ffffff',
+            scale: 4,
+            flowDirection: new THREE.Vector2( 1, 0 ), // green red flow direction, along x-axis
+            textureWidth: 1024,
+            textureHeight: 1024,
+            normalMap0: waterNormalMap, // Add normal map for ripples
+            normalMap1: waterNormalMap,
+        } );
+        // water.position.y = 1;
+        water.rotation.x = Math.PI * - 0.5; // rotate to horizontal
+        water.position.x = -100;
+        scene.add( water );
+
+        // Add environment map for water to not reflect black
+        const cubeTextureLoader = new THREE.CubeTextureLoader();
+        cubeTextureLoader.setPath( 'src/textures/bridge/' ); // include src/ or else wont show
+        const cubeTexture = cubeTextureLoader.load( [
+            'posx.jpg', 'negx.jpg',
+            'posy.jpg', 'negy.jpg',
+            'posz.jpg', 'negz.jpg'
+        ] );
+        scene.background = cubeTexture;
+
+        // light for box ?
+        const ambientLight = new THREE.AmbientLight( 0xe7e7e7, 1.2 );
+        scene.add( ambientLight );
+
+        const directionalLight = new THREE.DirectionalLight( 0xffffff, 2 );
+        directionalLight.position.set( - 1, 1, 1 );
+        scene.add( directionalLight );
     }
     
     // Perlin noise implementation

@@ -15,7 +15,13 @@ export class Scene {
 
         // Renderer setup
         const renderer = new THREE.WebGLRenderer({canvas});
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        // renderer.setSize(window.innerWidth, window.innerHeight);
+
+        // renderer = new THREE.WebGLRenderer( { antialias: true } ); // creates new canvas object
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.setPixelRatio( window.devicePixelRatio );
+        // renderer.setAnimationLoop( animate );
+        // document.body.appendChild( renderer.domElement ); // store the new canvas object 
 
         // Handle window resize
         window.addEventListener('resize', () => {
