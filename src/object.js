@@ -115,65 +115,39 @@ export class Ground {
     p = new Array(512);
     
     constructor(scene) {
-        // Initialize permutation table first
-        const permutation = new Array(256).fill(0).map((_, i) => i);
-        for (let i = 255; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [permutation[i], permutation[j]] = [permutation[j], permutation[i]];
-        }
-        for (let i = 0; i < 512; i++) {
-            this.p[i] = permutation[i & 255];
-        }
+        this.width = 500;
+        this.height = 1;
+        this.depth = 500;
+        // const geometry = new THREE.BoxGeometry(this.width, this.height, this.depth);
+        // const material = new THREE.MeshStandardMaterial({
+        //     color: 0xDDDDDD,
+        //     roughness: 0.5, // Added some roughness for more realistic appearance
+        // });
+        // this.ground = new THREE.Mesh(geometry, material);
+        // this.ground.position.set(0, -10, 0);
+        // this.ground.name = 'ground';
+        // scene.add(this.ground);
 
-        // Create a plane with more segments for detailed terrain
-        const width = 500;
-        const height = 500;
-        const segmentsX = 128;
-        const segmentsZ = 128;
-        const geometry = new THREE.PlaneGeometry(width, height, segmentsX, segmentsZ);
-        
-        // Add Perlin noise to create terrain
-        const vertices = geometry.attributes.position.array;
-        
-        for (let i = 0; i < vertices.length; i += 3) {
-            const x = vertices[i];
-            const z = vertices[i + 2];
-            
-            // Create beach terrain
-            let height = this.perlinNoise(x * 0.005, z * 0.005) * 15; // Large waves
-            height += this.perlinNoise(x * 0.02, z * 0.02) * 5;      // Medium details
-            height += this.perlinNoise(x * 0.04, z * 0.04) * 2.5;    // Small details
-            
-            // Make center area flatter for beach
-            const distanceFromCenter = Math.sqrt(x * x + z * z);
-            const beachRadius = 100;
-            if (distanceFromCenter < beachRadius) {
-                // Smooth transition to beach
-                const factor = distanceFromCenter / beachRadius;
-                height *= factor * factor;
-            }
-            
-            vertices[i + 1] = height;
-        }
-        
-        // Update normals for proper lighting
-        geometry.computeVertexNormals();
-        
-        // Create beach materials
-        const sandTexture = this.createSandTexture();
-        const material = new THREE.MeshStandardMaterial({
-            map: sandTexture,
-            roughness: 0.8,
-            metalness: 0.1,
-            side: THREE.DoubleSide
-        });
-        
-        this.ground = new THREE.Mesh(geometry, material);
-        this.ground.rotation.x = -Math.PI / 2;
-        this.ground.position.y = -10;
-        this.ground.name = 'ground';
-        
-        scene.add(this.ground);
+        // ground from three.js example
+        const groundGeometry = new THREE.PlaneGeometry( 500, 500, 10, 10 );
+        const groundMaterial = new THREE.MeshBasicMaterial( { color: 0xFFC0CB } );
+        const ground = new THREE.Mesh( groundGeometry, groundMaterial );
+        ground.rotation.x = Math.PI * - 0.5;
+        ground.position.set(0, -10, 0);
+        scene.add( ground );
+
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.load( 'src/textures/beach_1.png', function ( map ) {
+
+            map.wrapS = THREE.RepeatWrapping;
+            map.wrapT = THREE.RepeatWrapping;
+            map.anisotropy = 16;
+            map.repeat.set( 1, 1 );
+            map.colorSpace = THREE.SRGBColorSpace;
+            groundMaterial.map = map;
+            groundMaterial.needsUpdate = true;
+
+        } );
     }
     
     // Perlin noise implementation
