@@ -1,12 +1,11 @@
 import * as THREE from 'three';
 
 export class Ball {
-    
     constructor(scene, ballname) {
         this.timeStep = 0.25;
         this.gravity = 9.8;
         this.bounciness = 0.8;
-        this.floorY = -2;
+        this.floorY = -10;
         this.radius = 20;
         this.maxStretch = 2.0;
         this.minSquash = 0.5;
@@ -97,8 +96,10 @@ export class Ball {
 
 export class Ground {
     constructor(scene) {
-        //const geometry = new THREE.PlaneGeometry(500, 500);
-        const geometry = new THREE.BoxGeometry(500, 1, 500);
+        this.width = 500;
+        this.height = 1;
+        this.depth = 500;
+        const geometry = new THREE.BoxGeometry(this.width, this.height, this.depth);
         const material = new THREE.MeshStandardMaterial({
             color: 0xDDDDDD,
             roughness: 0.5, // Added some roughness for more realistic appearance
