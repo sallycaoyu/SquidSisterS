@@ -145,9 +145,9 @@ export class Ground {
     // p = new Array(512);
     
     constructor(scene) {
-        this.width = 5000;
+        this.width = 10000;
         this.height = 1;
-        this.depth = 5000;
+        this.depth = 10000;
 
         // attributes for terrain generation
         this.octaves = 4; // num of noise layers
@@ -183,14 +183,14 @@ export class Ground {
         // }
 
         // positions.needsUpdate = true;
-        // groundGeometry.computeVertexNormals();
+        groundGeometry.computeVertexNormals();
 
         ground.rotation.x = Math.PI * - 0.5; // turn it to horizontal plane
-        ground.position.set(0, -10, 0);
+        ground.position.set(0, -20, 0);
         scene.add( ground );
 
 
-        // load beach texture onto ground
+        //load beach texture onto ground
         const textureLoader = new THREE.TextureLoader();
         textureLoader.load( 'src/textures/beach_1.png', function ( map ) {
             map.wrapS = THREE.RepeatWrapping;
@@ -230,11 +230,11 @@ export class Ground {
 
         // Add skybox (environment map) for water to not reflect black
         const cubeTextureLoader = new THREE.CubeTextureLoader();
-        cubeTextureLoader.setPath( 'src/textures/bridge/' ); // include src/ or else wont show
+        cubeTextureLoader.setPath( 'src/textures/sky/' ); // include src/ or else wont show
         const cubeTexture = cubeTextureLoader.load( [
-            'posx.jpg', 'negx.jpg',
-            'posy.jpg', 'negy.jpg',
-            'posz.jpg', 'negz.jpg'
+            'negx.png', 'posx.png',
+            'posy.png', 'negy.png',
+            'posz.png', 'negz.png'
         ] );
         scene.background = cubeTexture;
 

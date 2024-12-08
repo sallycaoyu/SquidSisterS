@@ -39,7 +39,11 @@ dragControls.addEventListener( 'hoveron', function(event) {
 });
 
 dragControls.addEventListener( 'hoveroff', function(event) {
-    cameraControl.enabled = true; // Disable OrbitControls
+    cameraControl.enabled = true; // Enable OrbitControls
+});
+
+dragControls.addEventListener( 'drag', function(event){
+    cameraControl.enabled = false; // Disable OrbitControls
 });
 
 dragControls.addEventListener( 'dragend', function(event){

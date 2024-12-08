@@ -9,6 +9,8 @@ export class Scene {
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 10, 100);
         camera.lookAt(0, 0, 0);
+
+        // Camera control setup
         const cameraControl = new OrbitControls(camera, canvas); // enable spin view w mouse
         cameraControl.maxPolarAngle = Math.PI / 2; // Limit to 90 degrees (horizontal)
         cameraControl.minPolarAngle = 0;           // Top view limit
