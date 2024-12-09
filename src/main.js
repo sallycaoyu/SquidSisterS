@@ -46,6 +46,7 @@ createAnimals();
 
 
 const dragControls = new DragControls(ballDragList, camera, renderer.domElement);
+dragControls.transformGroup = true; // drag a whole group (all parts of the squid/ball)
 
 // Disable OrbitControls while dragging
 dragControls.addEventListener( 'hoveron', function(event) {

@@ -168,10 +168,8 @@ export class Squid {
             loader.load('src/model/cute_squid/scene.gltf', (gltf) => {
                 this.body = gltf.scene;
                 this.body.name = ballname;
-                //this.body.scale.set(400, 400, 400); 
                 this.body.traverse((child) => {
                     if (child.isMesh) {
-                        console.log(child.name);
                         child.scale.set(10, 10, 10);
                         child.castShadow = true;
                         child.receiveShadow = true;
@@ -198,8 +196,6 @@ export class Squid {
                     }
                 }
                 this.body.position.copy(position);
-
-                
 
                 ballDragList.push(this.body);
                 scene.add(this.body);
