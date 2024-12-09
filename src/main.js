@@ -61,9 +61,6 @@ dragControls.addEventListener( 'hoveroff', function(event) {
 });
 
 dragControls.addEventListener( 'drag', function(event){
-    if (event.object.position.y > 200) {
-        event.object.position.y = 200;
-    }
     cameraControl.enabled = false; // Disable OrbitControls
 });
 
@@ -71,9 +68,6 @@ dragControls.addEventListener( 'dragend', function(event){
     // event.object.scale.x /= 1.2; // return the size
     // event.object.scale.y /= 1.2;
     // event.object.scale.z /= 1.2;
-    if (event.object.position.y > 200) {
-        event.object.position.y = 200;
-    }
     cameraControl.enabled = true; // Re-enable OrbitControls
 });
 
