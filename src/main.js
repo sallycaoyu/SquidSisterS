@@ -1,5 +1,5 @@
 import { Scene } from './scene.js';
-import { Ball, Ground } from './object.js';
+import { Ball, Ground, Squid } from './object.js';
 import { DirectionalLight, SpotLight } from './light.js';
 import { Physics } from './physics.js';
 import { DragControls } from 'three/examples/jsm/controls/DragControls';
@@ -15,18 +15,35 @@ const physics = new Physics();
 console.log('Creating balls...');
 const ballList = [];
 const ballDragList = [];
-for (let i = 0; i < 10; i++) {
-    const ballname = `ball-${i}`;
-    const ballObject = new Ball(scene, ballname, ballDragList);
-    const ball = scene.getObjectByName(ballname);
-    if (ball) {
-        ballList.push(ballObject);
-        //ballDragList.push(ballObject.body); 
-        console.log(`Created ball: ${ballname}`);
+
+async function createAnimals() {
+    for (let i = 0; i < 9; i++) {
+        const ballname = `ball-${i}`;
+        const ballObject = new Ball(scene, ballname, ballDragList);
+        const ball = scene.getObjectByName(ballname);
+        if (ball) {
+            ballList.push(ballObject);
+            //ballDragList.push(ballObject.body); 
+            console.log(`Created ball: ${ballname}`);
+        } else {
+            console.error(`Failed to create ball: ${ballname}`);
+        }
+    }
+
+    const squidname = 'squid';
+    const squidObject = await new Squid(scene, squidname, ballDragList);
+    const squid = scene.getObjectByName(squidname);
+    if (squid) {
+        ballList.push(squidObject);
+        //ballDragList.push(squidObject.body);
+        console.log(`Created squid: ${squidname}`);
     } else {
-        console.error(`Failed to create ball: ${ballname}`);
+        console.error(`Failed to create squid: ${squidname}`);
     }
 }
+
+createAnimals();
+
 
 const dragControls = new DragControls(ballDragList, camera, renderer.domElement);
 

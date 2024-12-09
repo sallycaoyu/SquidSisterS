@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Water } from 'three/addons/objects/Water2.js';
 import { Noise } from 'noisejs';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 export class Ball {
     constructor(scene, ballname, ballDragList) {
@@ -91,6 +92,134 @@ export class Ball {
 
 
     update() {
+        const minWaterX = -250;
+        const maxWaterX = 50;
+
+         // Apply gravity
+        this.velocity.y -= this.gravity * this.timeStep;
+        
+        // Update position
+        this.body.position.x += this.velocity.x * this.timeStep;
+        this.body.position.y += this.velocity.y * this.timeStep;
+        this.body.position.z += this.velocity.z * this.timeStep;
+        
+        // Enhanced floor bounce
+        if (this.body.position.y - this.radius < this.floorY) {
+            this.body.position.y = this.floorY + this.radius;
+            this.velocity.y = -this.velocity.y * this.bounciness;
+            
+            // Add random spin on bounce
+            this.body.rotation.x += (Math.random() - 0.5) * 0.2;
+            this.body.rotation.z += (Math.random() - 0.5) * 0.2;
+            
+            // Add random horizontal movement
+            this.velocity.x += (Math.random() - 0.5) * 2;
+            this.velocity.z += (Math.random() - 0.5) * 2;
+        }
+        if (this.body.position.x > maxWaterX && this.body.position.x < 500) {
+            this.velocity.x *= 0.8;
+            this.velocity.y *= 0.8;
+            this.velocity.z *= 0.8;
+        }
+
+
+        // Enhanced wall bounds
+        const bounds = 200;
+        if (Math.abs(this.body.position.x) > bounds) {
+            this.velocity.x *= -this.bounciness;
+            this.body.position.x = Math.sign(this.body.position.x) * bounds;
+        }
+        if (Math.abs(this.body.position.z) > bounds) {
+            this.velocity.z *= -this.bounciness;
+            this.body.position.z = Math.sign(this.body.position.z) * bounds;
+        }
+        
+        // Enhanced squash and stretch
+        const verticalStretch = Math.min(this.maxStretch, 1 + this.velocity.y * 0.001);
+        const horizontalSquash = Math.max(this.minSquash, 1 / Math.sqrt(Math.abs(verticalStretch)));
+        this.body.scale.set(horizontalSquash, verticalStretch, horizontalSquash);
+    }
+}
+
+export class Squid {
+    constructor(scene, ballname, ballDragList) {
+        this.timeStep = 0.25;
+        this.gravity = 9.8;
+        this.bounciness = 0.8;
+        this.floorY = -10;
+        this.minRadius = 8;
+        this.maxRadius = 20;
+        this.radius = Math.max(this.minRadius, Math.random() * this.maxRadius);
+        this.maxStretch = 2.0;
+        this.minSquash = 0.5;
+        this.maxVelocity = 1.5;
+
+
+        const velocity = this.maxVelocity * (1 - (this.radius - this.minRadius) / (this.maxRadius - this.minRadius));
+        this.velocity = new THREE.Vector3(
+            velocity,
+            1.2 * velocity,
+            velocity
+        );
+        this.mass = this.radius * this.radius * this.radius;  // Mass proportional to volume
+
+        return new Promise((resolve, reject) => {
+            const loader = new GLTFLoader();
+            loader.load('src/model/cute_squid/scene.gltf', (gltf) => {
+                this.body = gltf.scene;
+                this.body.name = ballname;
+                //this.body.scale.set(400, 400, 400); 
+                this.body.traverse((child) => {
+                    if (child.isMesh) {
+                        console.log(child.name);
+                        child.scale.set(10, 10, 10);
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });
+
+                let position;
+                let isPositionValid = false;
+                while (!isPositionValid) {
+                    position = new THREE.Vector3(
+                        Math.random() * 100 - 50,
+                        Math.random() * 200 - 30,
+                        Math.random() * 80 - 40
+                    );
+                    isPositionValid = true;
+                    for (const obj of scene.children) {
+                        if (obj instanceof THREE.Mesh && obj.geometry instanceof THREE.SphereGeometry) {
+                            const distance = position.distanceTo(obj.position);
+                            if (distance < 40) { // Ensure a minimum distance of 10 units
+                                isPositionValid = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+                this.body.position.copy(position);
+
+                
+
+                ballDragList.push(this.body);
+                scene.add(this.body);
+                resolve(this);
+            }, // Loading progress
+            (xhr) => {
+                console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
+            },
+            // Error handling
+            (error) => {
+                console.error('Error loading model:', error);
+                reject(error);
+            });
+        });
+    }
+
+
+    update() {
+        if (!this.body) return; 
+
         const minWaterX = -250;
         const maxWaterX = 50;
 
