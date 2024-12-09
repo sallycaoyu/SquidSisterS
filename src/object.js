@@ -98,6 +98,7 @@ export class Ball {
     update() {
         const minWaterX = -250;
         const maxWaterX = 50;
+        const velocity = this.maxVelocity * (1 - (this.radius - this.minRadius) / (this.maxRadius - this.minRadius));
 
          // Apply gravity
         this.velocity.y -= this.gravity * this.timeStep;
@@ -110,21 +111,34 @@ export class Ball {
         // Enhanced floor bounce
         if (this.body.position.y - this.radius < this.floorY) {
             this.body.position.y = this.floorY + this.radius;
-            this.velocity.y = -this.velocity.y * this.bounciness;
+            // const vx = this.velocity.x;
+            const vy =  -this.velocity.y * this.bounciness;
+            // const vz = this.velocity.z; 
+            if (this.body.position.x > maxWaterX && this.body.position.x < 500) { // if land in sand
+                this.velocity.x *= 0.6;
+                this.velocity.y = 0.6 * vy;
+                this.velocity.z *= 0.6;
+                // add random horizontal plan movements 
+                this.velocity.x += (Math.random() - 0.5) * 5;
+                this.velocity.z += (Math.random() - 0.5) * 5;
+            } else { // land in water
+                this.velocity.x *= 0.8;
+                this.velocity.y = 0.8 * vy;
+                this.velocity.z *= 0.8;
+                this.velocity.x += 0.15; // flow with water
+                // this.velocity.y = vy;
+                // this.velocity.z = velocity + 0.1;
+                // this.velocity.z += (Math.random() - 0.5) * 2;
+            }
             
             // Add random spin on bounce
-            this.body.rotation.x += (Math.random() - 0.5) * 0.2;
-            this.body.rotation.z += (Math.random() - 0.5) * 0.2;
+            this.body.rotation.x += (Math.random() - 0.5) * 0.02;
+            this.body.rotation.z += (Math.random() - 0.5) * 0.02;
             
             // Add random horizontal movement
-            this.velocity.x += (Math.random() - 0.5) * 2;
-            this.velocity.z += (Math.random() - 0.5) * 2;
-        }
-        if (this.body.position.x > maxWaterX && this.body.position.x < 500) {
-            this.velocity.x *= 0.8;
-            this.velocity.y *= 0.8;
-            this.velocity.z *= 0.8;
-        }
+            // this.velocity.x += (Math.random() - 0.5) * 1;
+            // this.velocity.z += (Math.random() - 0.5) * 2;
+        } 
 
 
         // Enhanced wall bounds
@@ -239,22 +253,23 @@ export class Squid {
                 // this.velocity.x *= 0.8;
                 this.velocity.y = 0.8 * vy;
                 // this.velocity.z *= 0.8;
+            } else {
+                this.velocity.y = vy;
             }
-            this.velocity.y = vy;
             
             // Add random spin on bounce
-            this.body.rotation.x += (Math.random() - 0.5) * 0.2;
-            this.body.rotation.z += (Math.random() - 0.5) * 0.2;
+            this.body.rotation.x += (Math.random() - 0.5) * 0.02;
+            this.body.rotation.z += (Math.random() - 0.5) * 0.02;
             
             // Add random horizontal movement
             this.velocity.x += (Math.random() - 0.5) * 2;
             this.velocity.z += (Math.random() - 0.5) * 2;
         }
-        // if (this.body.position.x > maxWaterX && this.body.position.x < 500) {
-        //     this.velocity.x *= 0.8;
-        //     this.velocity.y *= 0.8;
-        //     this.velocity.z *= 0.8;
-        // }
+        if (this.body.position.x > maxWaterX && this.body.position.x < 500) { // in sand
+            this.velocity.x -= 0.9;
+            this.velocity.y -= 0.9;
+            this.velocity.z -= 0.9;
+        }
 
 
         // Enhanced wall bounds

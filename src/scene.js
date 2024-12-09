@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
-import { DragControls } from 'three/examples/jsm/controls/DragControls';
+// import { DragControls } from 'three/examples/jsm/controls/DragControls';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
 export class Scene {
     constructor() {
