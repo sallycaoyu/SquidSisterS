@@ -31,15 +31,19 @@ export class Ball {
         );
         this.mass = this.radius * this.radius * this.radius;  // Mass proportional to volume
 
-        const bodyGeometry = new THREE.SphereGeometry(this.radius, 32, 32);
-        const bodyMaterial = new THREE.MeshStandardMaterial({
+        this.body = new THREE.Group();
+        this.body.name = ballname;
+        ballDragList.push(this.body);
+
+
+        const mainBodyGeometry = new THREE.SphereGeometry(this.radius, 32, 32);
+        const mainBodyMaterial = new THREE.MeshStandardMaterial({
             color: Math.random() * 0xffffff,
             roughness: 0.2, // Slight roughness for better light interaction
             metalness: 0.1
         });
-        this.body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-        this.body.name = ballname;
-        ballDragList.push(this.body);
+        this.mainBody = new THREE.Mesh(mainBodyGeometry, mainBodyMaterial);
+        this.body.add(this.mainBody);
 
         let position;
         let isPositionValid = false;
