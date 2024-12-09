@@ -162,7 +162,7 @@ export class Squid {
         const velocity = this.maxVelocity * (1 - (this.radius - this.minRadius) / (this.maxRadius - this.minRadius));
         this.velocity = new THREE.Vector3(
             velocity,
-            1.2 * velocity,
+            0.6 * velocity,
             velocity
         );
         this.mass = this.radius * this.radius * this.radius;  // Mass proportional to volume
@@ -234,7 +234,13 @@ export class Squid {
         // Enhanced floor bounce
         if (this.body.position.y - this.radius < this.floorY) {
             this.body.position.y = this.floorY + this.radius;
-            this.velocity.y = -this.velocity.y * this.bounciness;
+            const vy =  -this.velocity.y * this.bounciness;
+            if (this.body.position.x > maxWaterX && this.body.position.x < 500) { // is land in sand
+                // this.velocity.x *= 0.8;
+                this.velocity.y = 0.8 * vy;
+                // this.velocity.z *= 0.8;
+            }
+            this.velocity.y = vy;
             
             // Add random spin on bounce
             this.body.rotation.x += (Math.random() - 0.5) * 0.2;
@@ -244,11 +250,11 @@ export class Squid {
             this.velocity.x += (Math.random() - 0.5) * 2;
             this.velocity.z += (Math.random() - 0.5) * 2;
         }
-        if (this.body.position.x > maxWaterX && this.body.position.x < 500) {
-            this.velocity.x *= 0.8;
-            this.velocity.y *= 0.8;
-            this.velocity.z *= 0.8;
-        }
+        // if (this.body.position.x > maxWaterX && this.body.position.x < 500) {
+        //     this.velocity.x *= 0.8;
+        //     this.velocity.y *= 0.8;
+        //     this.velocity.z *= 0.8;
+        // }
 
 
         // Enhanced wall bounds
