@@ -311,7 +311,6 @@ export class Ground {
         const groundMaterial = new THREE.MeshStandardMaterial( { roughness: 0.8, metalness: 0.4 } );
         const ground = new THREE.Mesh( groundGeometry, groundMaterial );
 
-        // // Modify vertices to create the slope
         // const positions = groundGeometry.attributes.position;
         // for (let i = 0; i < positions.count; i++) {
         //     const x = positions.getX(i);
@@ -378,7 +377,7 @@ export class Ground {
 
 
 
-        // Add skybox (environment map) for water to not reflect black
+        // add skybox (environment map) for water to not reflect black
         const cubeTextureLoader = new THREE.CubeTextureLoader();
         cubeTextureLoader.setPath( 'src/textures/sky/' ); // include src/ or else wont show
         const cubeTexture = cubeTextureLoader.load( [
@@ -400,14 +399,14 @@ export class Ground {
 
 
         // sand terrain part starts here
-        const sandGeometry = new THREE.PlaneGeometry( 250, 500, 256, 256 );
+        const sandGeometry = new THREE.PlaneGeometry( 210, 500, 256, 256 );
         const sandMaterial = new THREE.MeshStandardMaterial( { roughness: 0.8, metalness: 0.1, color: '#c2b280', side: THREE.DoubleSide} );
         const sand = new THREE.Mesh( sandGeometry, sandMaterial );
 
         this.generateTerrain(sandGeometry);
 
         sand.rotation.x = Math.PI * - 0.5; // turn the sand to horizontal plane
-        sand.position.x = 150; // move it to the right of the water
+        sand.position.x = 145; // move it to the right of the water
         scene.add(sand);
 
 
@@ -445,23 +444,20 @@ export class Ground {
                 const noiseValue = noise.simplex2(x * freq, y * freq);
                 elevation += noiseValue * amp;
                 
-                amp *= this.persistence;    // Amplitude decreases with each octave
-                freq *= this.lacunarity;     // Frequency increases with each octave
+                amp *= this.persistence;
+                freq *= this.lacunarity;
             }
 
             // smooth the height for where the sand meets the water
-            const distanceFromWater = 150 + x; // Adjust this value based on your water position
-            const transitionZone = 100; // Width of the transition zone
+            const distanceFromWater = x - (-105); // distance from sand edge (relative x = -105) that touches water
+            const transitionZone = 100;
             let heightMultiplier = 1;
 
             if (distanceFromWater < transitionZone) {
-                // Smooth transition from 0 to 1
                 heightMultiplier = Math.max(0, distanceFromWater / transitionZone);
-                // Optional: use smoother transition with sine
                 heightMultiplier = Math.sin((heightMultiplier * Math.PI) / 2);
             }
             
-            // Apply the height multiplier
             elevation *= heightMultiplier;
             
             // horizontal plane rotated by 90 degrees, so z is the height
