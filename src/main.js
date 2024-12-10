@@ -23,8 +23,8 @@ const guiSettings = {
     numBalls: 9,
 };
 
-gui.add(guiSettings, 'numBalls', 0, 20, 1)
-    .name('Number of Baby Squids')
+gui.add(guiSettings, 'numBalls', 0, 200, 1)
+    .name('# of BabySquids')
     .onChange(async function(value) {
         // Remove existing balls
         for (const ball of ballList) {

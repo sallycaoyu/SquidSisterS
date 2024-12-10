@@ -45,9 +45,9 @@ export class Physics {
                     
                     // Add some random horizontal movement on collision
                     const randomForce = new THREE.Vector3(
-                        (Math.random() - 0.5) * 0.1,
+                        (Math.random() - 0.5) * 0.5,
                         0,
-                        (Math.random() - 0.5) * 0.1
+                        (Math.random() - 0.5) * 0.5
                     );
                     a1.velocity.add(randomForce);
                     a2.velocity.sub(randomForce);

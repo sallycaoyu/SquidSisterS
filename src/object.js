@@ -14,7 +14,7 @@ export class Ball {
         this.radius = Math.max(this.minRadius, Math.random() * this.maxRadius);
         this.maxStretch = 2.0;
         this.minSquash = 0.5;
-        this.maxVelocity = 1.5;
+        this.maxVelocity = 2.0;
 
 
         // this.velocity = new THREE.Vector3(
@@ -27,7 +27,7 @@ export class Ball {
         this.velocity = new THREE.Vector3(
             velocity,
             1.2 * velocity,
-            velocity
+            1.1 * velocity
         );
         this.mass = this.radius * this.radius * this.radius;  // Mass proportional to volume
 
@@ -50,7 +50,7 @@ export class Ball {
         while (!isPositionValid) {
             position = new THREE.Vector3(
                 Math.random() * 100 - 50,
-                Math.random() * 200 - 30,
+                Math.random() * 100 + 100,
                 Math.random() * 80 - 40
             );
             isPositionValid = true;
@@ -91,6 +91,11 @@ export class Ball {
         this.body.add(this.leftPupil);
         this.body.add(this.rightPupil);
 
+        // face random direction
+        this.body.rotation.x += (Math.random() - 0.5) / 2;
+        this.body.rotation.y += (Math.random() - 0.5) * 2;
+        this.body.rotation.z += (Math.random() - 0.5) / 2;
+
         scene.add(this.body);
     }
 
@@ -116,16 +121,16 @@ export class Ball {
             // const vz = this.velocity.z; 
             if (this.body.position.x > maxWaterX && this.body.position.x < 500) { // if land in sand
                 this.velocity.x *= 0.6;
-                this.velocity.y = 0.6 * vy;
+                this.velocity.y = 0.5 * vy;
                 this.velocity.z *= 0.6;
                 // add random horizontal plan movements 
                 this.velocity.x += (Math.random() - 0.5) * 5;
                 this.velocity.z += (Math.random() - 0.5) * 5;
             } else { // land in water
-                this.velocity.x *= 0.8;
-                this.velocity.y = 0.8 * vy;
-                this.velocity.z *= 0.8;
-                this.velocity.x += 0.15; // flow with water
+                this.velocity.x *= 0.9;
+                this.velocity.y = 1.15 * vy;
+                this.velocity.z *= 0.9;
+                this.velocity.x += 0.3; // flow with water
                 // this.velocity.y = vy;
                 // this.velocity.z = velocity + 0.1;
                 // this.velocity.z += (Math.random() - 0.5) * 2;
@@ -364,7 +369,7 @@ export class Ground {
         water = new Water( waterGeometry, {
             color: '#ffffff',
             scale: 4,
-            flowDirection: new THREE.Vector2( 1, 0 ), // green red flow direction, along x-axis
+            flowDirection: new THREE.Vector2( 4, 0 ), // green red flow direction, along x-axis
             textureWidth: 1024,
             textureHeight: 1024,
             normalMap0: waterNormalMap, // Add normal map for ripples
@@ -419,11 +424,11 @@ export class Ground {
         scene.add(ambientLightForSand);
 
         // Add box helper to visualize the sand plane
-        const helper = new THREE.BoxHelper(sand, 0xff0000);
-        scene.add(helper);
+        // const helper = new THREE.BoxHelper(sand, 0xff0000);
+        // scene.add(helper);
 
-        const axesHelper = new THREE.AxesHelper(100); // Size 100
-        scene.add(axesHelper);
+        // const axesHelper = new THREE.AxesHelper(100); // Size 100
+        // scene.add(axesHelper);
     }
 
     generateTerrain(sandGeometry) {
