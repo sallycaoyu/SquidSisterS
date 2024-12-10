@@ -3,12 +3,15 @@ import { Ball, Ground, Squid } from './object.js';
 import { DirectionalLight, SpotLight } from './light.js';
 import { Physics } from './physics.js';
 import { DragControls } from 'three/examples/jsm/controls/DragControls';
+import { GUI } from 'dat.gui';
+
+const gui = new GUI();
 
 console.log('Initializing scene...');
 const { scene, camera, renderer, cameraControl } = new Scene();
 const ground = new Ground(scene);
-const directionalLight = new DirectionalLight(scene);
-const spotLight = new SpotLight(scene);
+// const directionalLight = new DirectionalLight(scene);
+// const spotLight = new SpotLight(scene);
 const physics = new Physics();
 
 // create balls
@@ -16,33 +19,46 @@ console.log('Creating balls...');
 const ballList = [];
 const ballDragList = [];
 
-async function createAnimals() {
-    for (let i = 0; i < 9; i++) {
-        const ballname = `ball-${i}`;
-        const ballObject = new Ball(scene, ballname, ballDragList);
-        const ball = scene.getObjectByName(ballname);
-        if (ball) {
-            ballList.push(ballObject);
-            //ballDragList.push(ballObject.body); 
-            console.log(`Created ball: ${ballname}`);
-        } else {
-            console.error(`Failed to create ball: ${ballname}`);
+const guiSettings = {
+    numBalls: 9,
+};
+
+gui.add(guiSettings, 'numBalls', 0, 20, 1)
+    .name('Number of Baby Squids')
+    .onChange(async function(value) {
+        // Remove existing balls
+        for (const ball of ballList) {
+            scene.remove(ball.body);
         }
-    }
+        ballList.length = 0;
+        ballDragList.length = 0;
 
-    const squidname = 'squid';
-    const squidObject = await new Squid(scene, squidname, ballDragList);
-    const squid = scene.getObjectByName(squidname);
-    if (squid) {
-        ballList.push(squidObject);
-        //ballDragList.push(squidObject.body);
-        console.log(`Created squid: ${squidname}`);
-    } else {
-        console.error(`Failed to create squid: ${squidname}`);
-    }
-}
+        // Create new balls
+        for (let i = 0; i < value; i++) {
+            const ballname = `ball-${i}`;
+            const ballObject = new Ball(scene, ballname, ballDragList);
+            const ball = scene.getObjectByName(ballname);
+            if (ball) {
+                ballList.push(ballObject);
+                console.log(`Created ball: ${ballname}`);
+            } else {
+                console.error(`Failed to create ball: ${ballname}`);
+            }
+        }
+    
+        const squidname = 'squid';
+        const squidObject = await new Squid(scene, squidname, ballDragList);
+        const squid = scene.getObjectByName(squidname);
+        if (squid) {
+            ballList.push(squidObject);
+            console.log(`Created squid: ${squidname}`);
+        } else {
+            console.error(`Failed to create squid: ${squidname}`);
+        }
+    });
 
-createAnimals();
+
+
 
 
 const dragControls = new DragControls(ballDragList, camera, renderer.domElement);
